@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package protobuf;
+
+option go_package="tgrziminiar/grpcStreaming";
+
+service SingleMessage {
+  rpc OneMessage (Request) returns (Response) {}
+}
+
+message Request {
+  string key = 1;
+  string errors = 2;
+  string content = 3;
+}
+
+message Response {
+  int32 result = 1;
+}
