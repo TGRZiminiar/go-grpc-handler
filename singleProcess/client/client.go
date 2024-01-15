@@ -3,35 +3,53 @@ package main
 import (
 	"context"
 	"log"
+	"time"
+
 	grpcStreaming "tgrziminiar/grpcStreaming/singleProcess/proto"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
-	// Create a connection to the gRPC server.
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	opts := make([]grpc.DialOption, 0)
+
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	conn, err := grpc.Dial("localhost:5000", opts...)
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
 	defer conn.Close()
 
-	// Create a gRPC client.
 	client := grpcStreaming.NewSingleMessageClient(conn)
 
-	// Prepare a request.
-	request := &grpcStreaming.Request{
-		Key:     "example_key",
-		Errors:  "example_errors",
-		Content: "example_content",
-	}
+	responseChan := make(chan *grpcStreaming.Response)
 
-	// Make an RPC call to the server.
-	response, err := client.OneMessage(context.Background(), request)
-	if err != nil {
-		log.Fatalf("Error calling OneMessage: %v", err)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-	// Process the response.
-	log.Printf("Response from server: %+v", response)
+	go func() {
+
+		request := &grpcStreaming.Request{
+			Key:     "testing key",
+			Message: "hello request",
+		}
+
+		response, err := client.OneMessage(context.Background(), request)
+		if err != nil {
+			log.Fatalf("Error calling OneMessage: %v", err)
+			return
+		}
+
+		responseChan <- response
+		close(responseChan)
+	}()
+
+	select {
+	case response := <-responseChan:
+		log.Printf("Response from server: %+v", response)
+	case <-ctx.Done():
+		log.Println("Call timed out.")
+	}
 }

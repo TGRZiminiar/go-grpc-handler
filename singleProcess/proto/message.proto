@@ -10,10 +10,11 @@ service SingleMessage {
 
 message Request {
   string key = 1;
-  string errors = 2;
-  string content = 3;
+  string message = 2;
 }
 
 message Response {
-  int32 result = 1;
+  string key = 1;
+  string errors = 2;
+  string message = 3;
 }

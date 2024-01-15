@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	grpcStreaming "tgrziminiar/grpcStreaming/singleProcess/proto"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -18,26 +19,25 @@ func (g *grpcHandler) OneMessage(ctx context.Context, req *grpcStreaming.Request
 
 	fmt.Printf("Received Request: %+v\n", req)
 
-	// Example: Send a response.
 	response := &grpcStreaming.Response{
-		Result: 42,
+		Key:     "testing",
+		Errors:  "",
+		Message: "hello from server",
 	}
-
+	time.Sleep(1 * time.Second)
 	return response, nil
 }
 
 func main() {
-	// create listener
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", ":5000")
+
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	// create grpc server
 	s := grpc.NewServer()
 	grpcStreaming.RegisterSingleMessageServer(s, &grpcHandler{})
 
-	// and start...
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
