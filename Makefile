@@ -74,4 +74,4 @@ sss:
 
 
 
-.PHONY: client server protoc
+.PHONY: s-proto sc ss b-proto bc bs c-proto cc cs ss-proto ssc sss
