@@ -54,6 +54,7 @@ func main() {
 		for {
 			resp, err := stream.Recv()
 			if err == io.EOF {
+				log.Println("closing streaming from server")
 				return
 			}
 			if err != nil {

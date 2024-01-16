@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package protobuf;
+
+option go_package="tgrziminiar/grpcStreaming";
+
+service ClientStreaming {
+  rpc StreamMessage (stream Request) returns (Response) {}
+}
+
+message Request {
+  string key = 1;
+  string message = 2;
+}
+
+message Response {
+  string key = 1;
+  string errors = 2;
+  string message = 3;
+}
