@@ -40,13 +40,13 @@ c-proto:
 		--go-grpc_opt=paths=source_relative --go_opt=paths=source_relative *.proto
 
 
-# ClientStream Server
+# ClientStream Client
 cc:
 	go build -o bin/client \
 		tgrziminiar/grpcStreaming/clientStream/client
 	./bin/client
 
-# ClientStream Client
+# ClientStream Server
 cs:
 	go build -o bin/server \
 		tgrziminiar/grpcStreaming/clientStream/server

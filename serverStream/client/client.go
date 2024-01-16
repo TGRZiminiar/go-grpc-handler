@@ -22,42 +22,28 @@ func main() {
 	}
 
 	client := grpcStreaming.NewServerStreamingClient(conn)
-	stream, err := client.StreamMessage(context.Background(), &grpcStreaming.Request{})
+	stream, err := client.StreamMessage(context.Background(), &grpcStreaming.Request{
+		Key:     "testing key",
+		Message: "hello",
+	})
 	if err != nil {
 		log.Fatalf("open stream error %v", err)
 	}
 
 	done := make(chan struct{})
 	ctx := stream.Context()
-	responseChan := make(chan *grpcStreaming.Response)
-
-	go func() {
-
-		request := &grpcStreaming.Request{
-			Key:     "testing key",
-			Message: "hello request",
-		}
-
-		response, err := client.StreamMessage(context.Background(), request)
-		if err != nil {
-			log.Fatalf("Error calling OneMessage: %v", err)
-			return
-		}
-
-		fmt.Printf("response -> %+v\n", response)
-		// responseChan <- response
-		close(responseChan)
-	}()
 
 	go func() {
 		for {
 			resp, err := stream.Recv()
 			if err == io.EOF {
 				log.Println("closing streaming from server")
+				close(done)
 				return
 			}
 			if err != nil {
 				log.Fatalf("can not receive %v", err)
+				close(done)
 				return
 			}
 			fmt.Printf("client receive message -> %+v\n", resp)
@@ -73,5 +59,4 @@ func main() {
 	}()
 
 	<-done
-
 }
